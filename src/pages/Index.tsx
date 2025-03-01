@@ -1,12 +1,29 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useEffect, useState } from 'react';
+import OnboardingFlow from '@/components/OnboardingFlow';
+import { UserProfile } from '@/utils/types';
 
 const Index = () => {
+  const [hasProfile, setHasProfile] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Check if user has already completed onboarding
+    const storedProfile = localStorage.getItem('userProfile');
+    if (storedProfile) {
+      try {
+        const profile: UserProfile = JSON.parse(storedProfile);
+        if (profile.id) {
+          setHasProfile(true);
+        }
+      } catch (e) {
+        // If there's an error parsing, we'll keep hasProfile as false
+        console.error("Error loading profile:", e);
+      }
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <OnboardingFlow />
     </div>
   );
 };

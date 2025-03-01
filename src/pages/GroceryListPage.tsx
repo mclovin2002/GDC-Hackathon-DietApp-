@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
-import GroceryList from '@/components/GroceryList';
+import GroceryList from '@/components/grocery/GroceryList';
 import { Ingredient } from '@/utils/types';
 
 const GroceryListPage = () => {

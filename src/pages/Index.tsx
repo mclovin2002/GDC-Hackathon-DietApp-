@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
 import { UserProfile } from '@/utils/types';
+import { toast } from '@/components/ui/use-toast';
 
 const Index = () => {
   const [hasProfile, setHasProfile] = useState<boolean>(false);
@@ -17,6 +18,10 @@ const Index = () => {
         if (profile.id) {
           setHasProfile(true);
           navigate('/home');
+          toast({
+            title: "Welcome back!",
+            description: `Good to see you again, ${profile.name}!`,
+          });
         }
       } catch (e) {
         // If there's an error parsing, we'll keep hasProfile as false

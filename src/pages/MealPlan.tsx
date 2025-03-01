@@ -20,14 +20,52 @@ import Header from '@/components/Header';
 import RecipeCard from '@/components/RecipeCard';
 import { Recipe, Ingredient, UserProfile } from '@/utils/types';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '../hooks/useAuth';
+import { dietService } from '../lib/services/dietService';
+import type { DietPlan } from '../lib/supabase';
+import { DietPlanForm } from '../components/diet/DietPlanForm';
+import { MealTracker } from '../components/diet/MealTracker';
+import { ProgressTracker } from '../components/diet/ProgressTracker';
+import { toast } from 'sonner';
 
 const MealPlan = () => {
+  const { user } = useAuth();
   const [selectedRecipes, setSelectedRecipes] = useState<Recipe[]>([]);
   const [groceryList, setGroceryList] = useState<Ingredient[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [currentDay, setCurrentDay] = useState(1);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: useToastToast } = useToast();
+  const [dietPlans, setDietPlans] = useState<DietPlan[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<DietPlan | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      loadDietPlans();
+    }
+  }, [user]);
+
+  const loadDietPlans = async () => {
+    if (!user) return;
+    try {
+      const plans = await dietService.getUserDietPlans(user.id);
+      setDietPlans(plans);
+      if (plans.length > 0 && !selectedPlan) {
+        setSelectedPlan(plans[0]);
+      }
+    } catch (error) {
+      toast.error('Failed to load diet plans');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePlanCreated = (plan: DietPlan) => {
+    setDietPlans([plan, ...dietPlans]);
+    setSelectedPlan(plan);
+  };
 
   useEffect(() => {
     // Load user profile
@@ -122,13 +160,16 @@ const MealPlan = () => {
     return allIngredients;
   };
 
-  if (!profile) {
+  if (!user) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 pt-24 pb-20">
-          <p>Loading...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-center text-muted-foreground">
+              Please sign in to access your meal plans
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -143,7 +184,7 @@ const MealPlan = () => {
             <div>
               <h1 className="text-3xl font-bold mb-2">Your Meal Plan</h1>
               <p className="text-muted-foreground">
-                {profile.timeframe} week plan customized for your {profile.weightGoal.replace('_', ' ')} goal
+                {profile?.timeframe} week plan customized for your {profile?.weightGoal.replace('_', ' ')} goal
               </p>
             </div>
             
@@ -165,7 +206,7 @@ const MealPlan = () => {
                 Weekly Overview
               </CardTitle>
               <CardDescription>
-                Your {profile.timeframe}-week meal plan at a glance
+                Your {profile?.timeframe}-week meal plan at a glance
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -40,7 +40,7 @@ Orders groceries weekly to prevent spoilage and ensure freshness.
 Users don’t have to worry about grocery shopping, making it hassle-free.
 
 ## **Problem Solving**
-**Describes how the problem was solved**
+**Describes how the problem was solved.**
 
 1. Meal Plan Generation Algorithm
 

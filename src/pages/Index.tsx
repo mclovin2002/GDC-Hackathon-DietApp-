@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import OnboardingFlow from '@/components/OnboardingFlow';
+import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
 import { UserProfile } from '@/utils/types';
 
 const Index = () => {

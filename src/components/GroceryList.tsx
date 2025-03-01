@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { ShoppingCart, Check, CheckCircle, X, Store, ArrowRight } from 'lucide-react';
+import { ShoppingCart, Check, CheckCircle, X as XIcon, Store, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -164,7 +163,6 @@ export default function GroceryList({ ingredients, mealPlanId }: GroceryListProp
                   <Checkbox
                     id="select-all"
                     checked={allChecked}
-                    indeterminate={someChecked && !allChecked}
                     onCheckedChange={(checked) => toggleAllItems(!!checked)}
                   />
                   <label

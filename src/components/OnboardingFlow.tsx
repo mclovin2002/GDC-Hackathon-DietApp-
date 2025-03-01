@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Check, X as XIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
@@ -289,7 +289,7 @@ export default function OnboardingFlow() {
                         className="h-4 w-4 ml-2"
                         onClick={() => removeAllergen(allergen)}
                       >
-                        <X className="h-3 w-3" />
+                        <XIcon className="h-3 w-3" />
                       </Button>
                     </div>
                   ))}

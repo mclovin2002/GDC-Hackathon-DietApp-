@@ -109,6 +109,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/signin`
+        }
       });
       
       if (error) {
@@ -119,28 +122,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Auth signup response:', data);
       
       if (data.user) {
-        console.log('Creating user profile...');
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
+        console.log('Creating user profile...', data.user);
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
               id: data.user.id,
               email: data.user.email,
               created_at: new Date().toISOString(),
-            },
-          ])
-          .select()
-          .single();
-          
-        if (profileError) {
+              name: email.split('@')[0], // Default name from email
+            });
+            
+          if (profileError) {
+            console.error('Profile creation error:', profileError);
+            // Don't throw the error, just log it
+            toast({
+              title: "Note",
+              description: "Account created but profile setup incomplete. You can update your profile after signing in.",
+            });
+          }
+        } catch (profileError) {
           console.error('Profile creation error:', profileError);
-          throw profileError;
+          // Don't throw the error, just log it
         }
         
         toast({
           title: "Success",
-          description: "Account created successfully! Please check your email for verification."
+          description: "Account created successfully! Please check your email for verification.",
         });
+        
+        // Navigate to sign in page after successful signup
+        setTimeout(() => {
+          window.location.href = '/signin';
+        }, 2000);
       } else {
         throw new Error('No user data returned from signup');
       }
@@ -150,8 +164,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error instanceof Error) {
         errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null) {
-        errorMessage = JSON.stringify(error);
+      } else if (typeof error === 'object' && error !== null && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
       }
       
       toast({

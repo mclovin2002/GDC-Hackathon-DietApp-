@@ -105,89 +105,70 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       console.log('Starting sign up process...', { email });
-      
-      // First, check if the user already exists
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', email)
-        .single();
 
-      if (existingUser) {
-        throw new Error('An account with this email already exists');
-      }
-
+      // Step 1: Sign up with Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/signin`,
-          data: {
-            email,
-            name: email.split('@')[0],
-          }
-        }
       });
       
       if (error) {
         console.error('Supabase auth error:', error);
-        throw error;
+        throw new Error(error.message);
       }
       
-      console.log('Auth signup response:', data);
-      
-      if (data.user) {
-        console.log('Creating user profile...', { userId: data.user.id, email: data.user.email });
-        
-        // Create the user profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            email: data.user.email,
-            name: email.split('@')[0],
-            created_at: new Date().toISOString(),
-          });
-          
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-          // Log the error but don't throw it
-          toast({
-            title: "Note",
-            description: "Account created but profile setup incomplete. You can update your profile after signing in.",
-          });
-        } else {
-          console.log('Profile created successfully');
-        }
-        
-        toast({
-          title: "Success",
-          description: "Account created successfully! Please check your email for verification.",
-        });
-        
-        // Navigate to sign in page after successful signup
-        setTimeout(() => {
-          window.location.href = '/signin';
-        }, 2000);
+      if (!data?.user?.id) {
+        console.error('No user data returned:', data);
+        throw new Error('Failed to create account - no user data returned');
+      }
+
+      console.log('Successfully created auth user:', {
+        userId: data.user.id,
+        email: data.user.email
+      });
+
+      // Step 2: Create user profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,
+          email: data.user.email,
+          name: email.split('@')[0],
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (profileError) {
+        console.error('Failed to create profile:', profileError);
+        // Continue anyway since auth user was created
       } else {
-        throw new Error('No user data returned from signup');
+        console.log('Successfully created profile:', profileData);
       }
+
+      // Success notification
+      toast({
+        title: "Account Created",
+        description: "Please check your email to verify your account.",
+      });
+
+      // Return to sign-in page
+      window.location.href = '/signin';
+
     } catch (error) {
-      console.error('Error during sign up:', error);
-      let errorMessage = 'Failed to create account';
-      
+      console.error('Sign up process failed:', error);
+      let message = 'Failed to create account';
+
       if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null && 'message' in error) {
-        errorMessage = (error as { message: string }).message;
+        message = error.message;
       }
-      
+
       toast({
         title: "Error",
-        description: errorMessage,
+        description: message,
         variant: "destructive",
       });
-      
+
       throw error;
     } finally {
       setLoading(false);

@@ -7,15 +7,28 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-console.log('Initializing Supabase client with URL:', supabaseUrl);
+console.log('Initializing Supabase client...');
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true
+  },
+  db: {
+    schema: 'public'
+  },
+  global: {
+    headers: {
+      'x-application-name': 'diet-app'
+    }
   }
 });
+
+// Verify connection
+supabase.from('profiles').select('count').single()
+  .then(() => console.log('Successfully connected to Supabase'))
+  .catch(err => console.error('Failed to connect to Supabase:', err));
 
 // Types for your database tables
 export type Diet = {

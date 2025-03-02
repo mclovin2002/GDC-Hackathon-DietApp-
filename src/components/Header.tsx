@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
@@ -9,11 +8,11 @@ export default function Header() {
   const location = useLocation();
 
   const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Recipes', href: '/recipes' },
-    { name: 'Meal Plan', href: '/meal-plan' },
-    { name: 'Grocery List', href: '/grocery-list' },
-    { name: 'Profile', href: '/profile' },
+    { name: 'Home', href: '/dashboard' },
+    { name: 'Recipes', href: '/dashboard/recipes' },
+    { name: 'Meal Plan', href: '/dashboard/meal-plan' },
+    { name: 'Grocery List', href: '/dashboard/grocery-list' },
+    { name: 'Profile', href: '/dashboard/profile' },
   ];
 
   return (

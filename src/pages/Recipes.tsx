@@ -162,10 +162,9 @@ const Recipes = () => {
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All</SelectItem>
-                  <SelectItem value="quick">Quick (≤20 mins)</SelectItem>
-                  <SelectItem value="medium">Medium (21-40 mins)</SelectItem>
-                  <SelectItem value="long">Long (>40 mins)</SelectItem>
+                  <SelectItem value="short">Short (&lt;20 mins)</SelectItem>
+                  <SelectItem value="medium">Medium (20-40 mins)</SelectItem>
+                  <SelectItem value="long">Long (&gt;40 mins)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -1,13 +1,16 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../lib/AuthContext';
+import type { User } from '@supabase/supabase-js';
 import { motion } from 'framer-motion';
 import { ChevronRight, Utensils, Calendar, ShoppingBag, ArrowRight } from 'lucide-react';
 
-const HomePage = () => {
+interface HomePageProps {
+  user?: User | null;
+}
+
+const HomePage = ({ user }: HomePageProps) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   
   return (
     <div className="min-h-screen bg-background">

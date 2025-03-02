@@ -12,6 +12,7 @@ import PaymentPage from './pages/PaymentPage';
 import DeliveryPage from './pages/DeliveryPage';
 import SettingsPage from './pages/SettingsPage';
 import NotFound from './pages/NotFound';
+import Survey from './pages/Survey';
 import './App.css';
 
 // Protected route wrapper
@@ -73,6 +74,7 @@ function App() {
             <Route path="" element={<DashboardHome />} />
             <Route path="recipes" element={<Recipes />} />
             <Route path="meal-plan" element={<MealPlan />} />
+            <Route path="survey" element={<Survey />} />
             <Route path="payment" element={<PaymentPage />} />
             <Route path="delivery" element={<DeliveryPage />} />
             <Route path="settings" element={<SettingsPage />} />

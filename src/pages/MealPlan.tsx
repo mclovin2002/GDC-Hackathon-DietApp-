@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Calendar as CalendarIcon } from '@/components/ui/calendar';
+import { supabase } from '../lib/supabase';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
@@ -79,14 +80,30 @@ const MealPlan = () => {
   const loadDietPlans = async () => {
     if (!user) return;
     try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('preferences')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.preferences) {
+        // No preferences found, redirect to survey
+        navigate('/dashboard/survey');
+        return;
+      }
+
       const plans = await dietService.getUserDietPlans(user.id);
       setDietPlans(plans);
       if (plans.length > 0 && !selectedPlan) {
         setSelectedPlan(plans[0]);
+      } else if (plans.length === 0) {
+        // No meal plans found, redirect to survey
+        navigate('/dashboard/survey');
+        return;
       }
     } catch (error) {
+      console.error('Failed to load diet plans:', error);
       toast.error('Failed to load diet plans');
-      console.error(error);
     } finally {
       setLoading(false);
     }

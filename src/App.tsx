@@ -46,6 +46,10 @@ function RootRoute() {
     );
   }
 
+  if (!user) {
+    return <Navigate to="/survey" />;
+  }
+
   return <HomePage user={user} />;
 }
 
@@ -63,6 +67,7 @@ function App() {
           <Route path="/" element={<RootRoute />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/survey" element={<Survey />} />
           <Route
             path="/dashboard/*"
             element={
@@ -74,7 +79,6 @@ function App() {
             <Route path="" element={<DashboardHome />} />
             <Route path="recipes" element={<Recipes />} />
             <Route path="meal-plan" element={<MealPlan />} />
-            <Route path="survey" element={<Survey />} />
             <Route path="payment" element={<PaymentPage />} />
             <Route path="delivery" element={<DeliveryPage />} />
             <Route path="settings" element={<SettingsPage />} />

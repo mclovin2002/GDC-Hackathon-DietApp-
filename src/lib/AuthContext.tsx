@@ -104,13 +104,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const openSignUp = async (email: string, password: string) => {
     try {
       setLoading(true);
-      console.log('Starting sign up process...');
+      console.log('Starting sign up process...', { email });
       
+      // First, check if the user already exists
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+      if (existingUser) {
+        throw new Error('An account with this email already exists');
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/signin`
+          emailRedirectTo: `${window.location.origin}/signin`,
+          data: {
+            email,
+            name: email.split('@')[0],
+          }
         }
       });
       
@@ -122,28 +137,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Auth signup response:', data);
       
       if (data.user) {
-        console.log('Creating user profile...', data.user);
-        try {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-              id: data.user.id,
-              email: data.user.email,
-              created_at: new Date().toISOString(),
-              name: email.split('@')[0], // Default name from email
-            });
-            
-          if (profileError) {
-            console.error('Profile creation error:', profileError);
-            // Don't throw the error, just log it
-            toast({
-              title: "Note",
-              description: "Account created but profile setup incomplete. You can update your profile after signing in.",
-            });
-          }
-        } catch (profileError) {
+        console.log('Creating user profile...', { userId: data.user.id, email: data.user.email });
+        
+        // Create the user profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            email: data.user.email,
+            name: email.split('@')[0],
+            created_at: new Date().toISOString(),
+          });
+          
+        if (profileError) {
           console.error('Profile creation error:', profileError);
-          // Don't throw the error, just log it
+          // Log the error but don't throw it
+          toast({
+            title: "Note",
+            description: "Account created but profile setup incomplete. You can update your profile after signing in.",
+          });
+        } else {
+          console.log('Profile created successfully');
         }
         
         toast({

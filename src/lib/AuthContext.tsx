@@ -104,32 +104,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const openSignUp = async (email: string, password: string) => {
     try {
       setLoading(true);
+      console.log('Starting sign up process...');
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase auth error:', error);
+        throw error;
+      }
+      
+      console.log('Auth signup response:', data);
       
       if (data.user) {
+        console.log('Creating user profile...');
         const { error: profileError } = await supabase
           .from('profiles')
           .insert([
             {
               id: data.user.id,
               email: data.user.email,
+              created_at: new Date().toISOString(),
             },
-          ]);
+          ])
+          .select()
+          .single();
           
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          throw profileError;
+        }
         
         toast({
           title: "Success",
           description: "Account created successfully! Please check your email for verification."
         });
+      } else {
+        throw new Error('No user data returned from signup');
       }
     } catch (error) {
       console.error('Error during sign up:', error);
+      let errorMessage = 'Failed to create account';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null) {
+        errorMessage = JSON.stringify(error);
+      }
+      
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      
       throw error;
     } finally {
       setLoading(false);

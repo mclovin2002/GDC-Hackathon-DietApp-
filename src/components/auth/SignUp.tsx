@@ -35,15 +35,36 @@ export function SignUp() {
       return;
     }
 
+    if (password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
       await openSignUp(email, password);
+      toast({
+        title: "Success",
+        description: "Account created! Please check your email for verification.",
+      });
       navigate('/signin');
     } catch (error) {
-      console.error('Error:', error);
+      console.error('SignUp Error:', error);
+      let errorMessage = 'Failed to create account';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null) {
+        errorMessage = JSON.stringify(error);
+      }
+      
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create account",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

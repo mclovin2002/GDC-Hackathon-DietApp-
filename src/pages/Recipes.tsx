@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Filter, BookOpen } from 'lucide-react';
+import { Plus, Filter, BookOpen, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,11 +15,20 @@ import RecipeCard from '@/components/RecipeCard';
 import { Recipe, UserProfile, DietaryRestriction } from '@/utils/types';
 import { mockRecipes } from '@/utils/mockData';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 const Recipes = () => {
   const [recipes, setRecipes] = useState<Recipe[]>(mockRecipes);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dietaryFilter, setDietaryFilter] = useState<DietaryRestriction | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
   const [selectedRecipes, setSelectedRecipes] = useState<Recipe[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const navigate = useNavigate();
@@ -43,11 +51,7 @@ const Recipes = () => {
   }, [navigate]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-
-  const handleDietaryFilterChange = (value: string) => {
-    setDietaryFilter(value as DietaryRestriction | 'all');
+    setSearchQuery(e.target.value);
   };
 
   const handleRecipeSelect = (recipe: Recipe) => {
@@ -82,10 +86,18 @@ const Recipes = () => {
   };
 
   const filteredRecipes = recipes.filter(recipe => {
-    const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDietary = dietaryFilter === 'all' || recipe.dietaryTags.includes(dietaryFilter);
-    return matchesSearch && matchesDietary;
+    const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDifficulty = !selectedDifficulty || recipe.difficulty === selectedDifficulty;
+    const matchesTime = !selectedTime || getTimeRange(recipe.time) === selectedTime;
+    return matchesSearch && matchesDifficulty && matchesTime;
   });
+
+  function getTimeRange(time: string): string {
+    const minutes = parseInt(time);
+    if (minutes <= 20) return 'quick';
+    if (minutes <= 40) return 'medium';
+    return 'long';
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -119,29 +131,41 @@ const Recipes = () => {
           
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 space-x-0 sm:space-x-4 mb-8">
             <div className="w-full sm:w-2/3">
-              <Input
-                placeholder="Search recipes..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="w-full"
-              />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search recipes..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+              </div>
             </div>
             
             <div className="w-full sm:w-1/3">
-              <Select
-                value={dietaryFilter}
-                onValueChange={handleDietaryFilterChange}
-              >
-                <SelectTrigger>
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filter by dietary needs" />
+              <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Difficulty" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Recipes</SelectItem>
-                  <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                  <SelectItem value="vegan">Vegan</SelectItem>
-                  <SelectItem value="gluten-free">Gluten-free</SelectItem>
-                  <SelectItem value="dairy-free">Dairy-free</SelectItem>
+                  <SelectItem value="">All</SelectItem>
+                  <SelectItem value="Easy">Easy</SelectItem>
+                  <SelectItem value="Medium">Medium</SelectItem>
+                  <SelectItem value="Hard">Hard</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="w-full sm:w-1/3">
+              <Select value={selectedTime} onValueChange={setSelectedTime}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Time" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All</SelectItem>
+                  <SelectItem value="quick">Quick (≤20 mins)</SelectItem>
+                  <SelectItem value="medium">Medium (21-40 mins)</SelectItem>
+                  <SelectItem value="long">Long (>40 mins)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -150,12 +174,29 @@ const Recipes = () => {
           {filteredRecipes.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredRecipes.map(recipe => (
-                <RecipeCard
-                  key={recipe.id}
-                  recipe={recipe}
-                  onSelect={handleRecipeSelect}
-                  isSelected={selectedRecipes.some(r => r.id === recipe.id)}
-                />
+                <Card key={recipe.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <img
+                    src={recipe.image}
+                    alt={recipe.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <CardHeader>
+                    <CardTitle>{recipe.title}</CardTitle>
+                    <CardDescription>{recipe.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>⏱ {recipe.time}</span>
+                      <span>📊 {recipe.difficulty}</span>
+                      <span>🔥 {recipe.calories} cal</span>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button className="w-full" onClick={() => handleRecipeSelect(recipe)}>
+                      {selectedRecipes.some(r => r.id === recipe.id) ? 'Remove' : 'Select'}
+                    </Button>
+                  </CardFooter>
+                </Card>
               ))}
             </div>
           ) : (

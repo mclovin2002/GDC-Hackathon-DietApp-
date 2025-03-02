@@ -1,20 +1,73 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
 import { 
   Card, 
   CardContent, 
   CardDescription, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardFooter
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CreditCard, Clock, History } from 'lucide-react';
+import { CreditCard, Clock, History, Check, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useToast } from '@/components/ui/use-toast';
+
+const SUBSCRIPTION_PLANS = [
+  {
+    id: 'basic',
+    name: 'Basic Plan',
+    price: 9.99,
+    features: [
+      'Personalized meal plans',
+      'Basic recipe access',
+      'Shopping list generation',
+      'Email support',
+    ],
+  },
+  {
+    id: 'pro',
+    name: 'Pro Plan',
+    price: 19.99,
+    features: [
+      'Everything in Basic',
+      'Advanced recipe customization',
+      'Nutrition tracking',
+      'Priority support',
+      'Meal prep guides',
+    ],
+  },
+  {
+    id: 'premium',
+    name: 'Premium Plan',
+    price: 29.99,
+    features: [
+      'Everything in Pro',
+      'Personal nutrition coach',
+      'Custom recipe creation',
+      '24/7 support',
+      'Family meal planning',
+      'Advanced analytics',
+    ],
+  },
+];
 
 const PaymentPage = () => {
+  const [selectedPlan, setSelectedPlan] = useState('basic');
+  const [showAddCard, setShowAddCard] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubscribe = () => {
+    toast({
+      title: "Subscription updated",
+      description: "Your subscription has been updated successfully.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -53,27 +106,59 @@ const PaymentPage = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-5">
-                    <div className="bg-secondary/50 rounded-lg p-4 flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-12 h-8 bg-primary/10 rounded flex items-center justify-center mr-4">
-                          <CreditCard className="h-5 w-5 text-primary" />
+                  {!showAddCard ? (
+                    <div className="space-y-4">
+                      <RadioGroup defaultValue="card1">
+                        <div className="flex items-center space-x-4 border rounded-lg p-4">
+                          <RadioGroupItem value="card1" id="card1" />
+                          <Label htmlFor="card1" className="flex-1">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="font-medium">•••• •••• •••• 4242</p>
+                                <p className="text-sm text-muted-foreground">Expires 12/24</p>
+                              </div>
+                              <img src="/visa.svg" alt="Visa" className="h-8" />
+                            </div>
+                          </Label>
                         </div>
-                        <div>
-                          <p className="font-medium">Visa ending in 4242</p>
-                          <p className="text-sm text-muted-foreground">Expires 04/25</p>
+                      </RadioGroup>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => setShowAddCard(true)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add New Card
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Card Number</Label>
+                        <Input placeholder="1234 5678 9012 3456" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Expiry Date</Label>
+                          <Input placeholder="MM/YY" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>CVC</Label>
+                          <Input placeholder="123" />
                         </div>
                       </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                        <Button variant="outline" size="sm">Remove</Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => setShowAddCard(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button className="flex-1">Add Card</Button>
                       </div>
                     </div>
-                    
-                    <div className="mt-6">
-                      <Button>Add New Payment Method</Button>
-                    </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -114,13 +199,44 @@ const PaymentPage = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-5 mb-6">
-                    <h3 className="text-lg font-medium mb-2">Current Plan: Premium</h3>
-                    <p className="text-muted-foreground mb-4">Your next billing date is June 1, 2023</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-2xl font-bold">$14.99/month</span>
-                      <Button variant="outline">Change Plan</Button>
-                    </div>
+                  <div className="grid md:grid-cols-3 gap-6 mb-12">
+                    {SUBSCRIPTION_PLANS.map((plan) => (
+                      <Card 
+                        key={plan.id}
+                        className={`relative ${selectedPlan === plan.id ? 'border-primary' : ''}`}
+                      >
+                        {selectedPlan === plan.id && (
+                          <div className="absolute -top-3 -right-3 bg-primary text-primary-foreground rounded-full p-1.5">
+                            <Check className="h-4 w-4" />
+                          </div>
+                        )}
+                        <CardHeader>
+                          <CardTitle>{plan.name}</CardTitle>
+                          <CardDescription>
+                            ${plan.price}/month
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-2">
+                            {plan.features.map((feature, index) => (
+                              <li key={index} className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-primary" />
+                                <span className="text-sm">{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+                        <CardFooter>
+                          <Button
+                            className="w-full"
+                            variant={selectedPlan === plan.id ? "secondary" : "outline"}
+                            onClick={() => setSelectedPlan(plan.id)}
+                          >
+                            {selectedPlan === plan.id ? 'Current Plan' : 'Select Plan'}
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    ))}
                   </div>
                   
                   <Separator className="my-6" />

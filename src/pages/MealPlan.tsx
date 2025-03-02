@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, ArrowRight, Utensils, ShoppingCart } from 'lucide-react';
+import { Calendar, ArrowRight, Utensils, ShoppingCart, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -27,6 +28,33 @@ import { DietPlanForm } from '../components/diet/DietPlanForm';
 import { MealTracker } from '../components/diet/MealTracker';
 import { ProgressTracker } from '../components/diet/ProgressTracker';
 import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Calendar as CalendarIcon } from '@/components/ui/calendar';
+
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+
+const MOCK_MEALS = {
+  Monday: {
+    Breakfast: { name: 'Oatmeal with Berries', calories: 350 },
+    Lunch: { name: 'Quinoa Buddha Bowl', calories: 420 },
+    Dinner: { name: 'Grilled Chicken Salad', calories: 380 },
+    Snack: { name: 'Apple with Almond Butter', calories: 200 },
+  },
+  Tuesday: {
+    Breakfast: { name: 'Greek Yogurt Parfait', calories: 300 },
+    Lunch: { name: 'Turkey Avocado Wrap', calories: 450 },
+    Dinner: { name: 'Salmon with Roasted Vegetables', calories: 520 },
+    Snack: { name: 'Mixed Nuts', calories: 180 },
+  },
+  // Add more mock data for other days
+};
 
 const MealPlan = () => {
   const { user } = useAuth();
@@ -39,6 +67,8 @@ const MealPlan = () => {
   const [dietPlans, setDietPlans] = useState<DietPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<DietPlan | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedMealType, setSelectedMealType] = useState(MEAL_TYPES[0]);
 
   useEffect(() => {
     if (user) {

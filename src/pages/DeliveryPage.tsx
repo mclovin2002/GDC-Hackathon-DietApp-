@@ -1,184 +1,207 @@
-
-import React from 'react';
-import Header from '@/components/Header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, History, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Package, MapPin, Clock, Calendar, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
+
+const MOCK_DELIVERIES = [
+  {
+    id: 1,
+    orderNumber: 'ORD-2024-001',
+    status: 'In Transit',
+    estimatedDelivery: '2024-03-15T14:00:00',
+    items: ['Vegetables', 'Fruits', 'Dairy'],
+    progress: 65,
+  },
+  {
+    id: 2,
+    orderNumber: 'ORD-2024-002',
+    status: 'Scheduled',
+    estimatedDelivery: '2024-03-18T10:00:00',
+    items: ['Meat', 'Seafood', 'Grains'],
+    progress: 25,
+  },
+];
 
 const DeliveryPage = () => {
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState('10-12');
+  const [deliveryAddress, setDeliveryAddress] = useState('123 Main St, City, State 12345');
+
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto px-4 pt-24 pb-20">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Delivery Status</h1>
-            <p className="text-muted-foreground">
-              Track your grocery deliveries
-            </p>
-          </div>
-          
-          <Tabs defaultValue="active">
-            <TabsList className="mb-6">
-              <TabsTrigger value="active">
-                <Package className="h-4 w-4 mr-2" />
-                Active Deliveries
-              </TabsTrigger>
-              <TabsTrigger value="history">
-                <History className="h-4 w-4 mr-2" />
-                Delivery History
-              </TabsTrigger>
-              <TabsTrigger value="issues">
-                <AlertCircle className="h-4 w-4 mr-2" />
-                Report Issues
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="active">
-              <Card className="glass-card mb-6">
-                <CardHeader>
-                  <CardTitle className="text-lg">Active Deliveries</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div className="rounded-lg border p-5">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="font-medium">Order #2439</h3>
-                          <p className="text-sm text-muted-foreground">Placed on May 15, 2023</p>
-                        </div>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                          In Transit
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center">
-                            <div className="w-10 h-10 bg-primary/10 rounded flex items-center justify-center mr-3">
-                              <img src="https://placehold.co/100" alt="Store logo" className="w-6 h-6" />
-                            </div>
-                            <span>Whole Foods Market</span>
-                          </div>
-                          <span className="text-sm">14 items</span>
-                        </div>
-                        
-                        <div className="bg-secondary/50 rounded p-3">
-                          <h4 className="font-medium text-sm mb-2">Estimated Delivery</h4>
-                          <p className="text-sm">Today, between 3:00 PM - 5:00 PM</p>
-                        </div>
-                        
-                        <div className="mt-4 pt-4 border-t flex justify-between">
-                          <Button variant="outline" size="sm">Track Order</Button>
-                          <Button variant="outline" size="sm">Order Details</Button>
-                        </div>
-                      </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-2">Delivery Status</h1>
+      <p className="text-muted-foreground mb-8">Track your grocery deliveries and manage preferences</p>
+
+      {/* Active Deliveries */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold mb-4">Active Deliveries</h2>
+        <div className="grid gap-6">
+          {MOCK_DELIVERIES.map((delivery) => (
+            <Card key={delivery.id}>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Package className="h-5 w-5" />
+                      Order #{delivery.orderNumber}
+                    </CardTitle>
+                    <CardDescription>
+                      Estimated delivery: {new Date(delivery.estimatedDelivery).toLocaleString()}
+                    </CardDescription>
+                  </div>
+                  <div className="text-right">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                      ${delivery.status === 'In Transit' ? 'bg-primary/10 text-primary' : 'bg-secondary text-secondary-foreground'}`}>
+                      {delivery.status}
+                    </span>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span>Progress</span>
+                      <span>{delivery.progress}%</span>
                     </div>
+                    <Progress value={delivery.progress} className="h-2" />
                   </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="glass-card">
-                <CardContent className="pt-6">
-                  <div className="bg-muted/50 rounded-lg p-5 text-center">
-                    <p className="text-muted-foreground">No other active deliveries at the moment.</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="history">
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle className="text-lg">Delivery History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((item, index) => (
-                      <div key={index} className="flex items-start justify-between py-4 border-b last:border-0">
-                        <div>
-                          <h3 className="font-medium">Order #{2438 - index}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Delivered on May {15 - (index * 7)}, 2023
-                          </p>
-                          <div className="flex items-center text-sm mt-1">
-                            <span className="inline-flex items-center mr-4">
-                              <img src="https://placehold.co/100" alt="Store logo" className="w-4 h-4 mr-1" />
-                              Whole Foods
-                            </span>
-                            <span>12 items</span>
-                          </div>
-                        </div>
-                        <Button variant="outline" size="sm">View Details</Button>
-                      </div>
+                  <div className="flex flex-wrap gap-2">
+                    {delivery.items.map((item, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-secondary rounded-full text-sm"
+                      >
+                        {item}
+                      </span>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="issues">
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle className="text-lg">Report Delivery Issues</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-amber-800">
-                      <div className="flex items-start">
-                        <AlertCircle className="h-5 w-5 mr-2 mt-0.5" />
-                        <div>
-                          <p className="font-medium">Need help with your delivery?</p>
-                          <p className="text-sm mt-1">
-                            If you're missing items, received damaged goods, or have other issues with your delivery, we're here to help.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <h3 className="font-medium">Select an order to report an issue:</h3>
-                      
-                      <div className="rounded-lg border p-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="font-medium">Order #2439</h4>
-                            <p className="text-sm text-muted-foreground">Delivered today</p>
-                          </div>
-                          <Button variant="outline" size="sm">Report Issue</Button>
-                        </div>
-                      </div>
-                      
-                      <div className="rounded-lg border p-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="font-medium">Order #2438</h4>
-                            <p className="text-sm text-muted-foreground">Delivered on May 8, 2023</p>
-                          </div>
-                          <Button variant="outline" size="sm">Report Issue</Button>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <h3 className="font-medium mb-2">Contact Support</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        For urgent issues or help with anything else, our support team is available.
-                      </p>
-                      <Button>Contact Support</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </main>
+      </div>
+
+      {/* Delivery Preferences */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Truck className="h-5 w-5" />
+            Delivery Preferences
+          </CardTitle>
+          <CardDescription>Manage your delivery settings</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label>Delivery Address</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={deliveryAddress}
+                  onChange={(e) => setDeliveryAddress(e.target.value)}
+                  className="flex-1"
+                />
+                <Button variant="outline">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Update
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Preferred Delivery Time</Label>
+              <Select value={selectedTimeSlot} onValueChange={setSelectedTimeSlot}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select time slot" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="8-10">8:00 AM - 10:00 AM</SelectItem>
+                  <SelectItem value="10-12">10:00 AM - 12:00 PM</SelectItem>
+                  <SelectItem value="12-14">12:00 PM - 2:00 PM</SelectItem>
+                  <SelectItem value="14-16">2:00 PM - 4:00 PM</SelectItem>
+                  <SelectItem value="16-18">4:00 PM - 6:00 PM</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Delivery Instructions</Label>
+              <Input
+                placeholder="E.g., Leave at front door, Call upon arrival, etc."
+                className="w-full"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Delivery History */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Delivery History
+          </CardTitle>
+          <CardDescription>View your past deliveries</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[
+              {
+                date: '2024-03-01',
+                orderNumber: 'ORD-2024-001',
+                items: ['Vegetables', 'Fruits', 'Dairy'],
+                status: 'Delivered',
+              },
+              {
+                date: '2024-02-15',
+                orderNumber: 'ORD-2024-002',
+                items: ['Meat', 'Seafood', 'Grains'],
+                status: 'Delivered',
+              },
+            ].map((delivery, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center py-4 border-b last:border-0"
+              >
+                <div>
+                  <p className="font-medium">Order #{delivery.orderNumber}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(delivery.date).toLocaleDateString()}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {delivery.items.map((item, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-1 bg-secondary rounded-full text-xs"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <span className="text-sm text-green-600">{delivery.status}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
